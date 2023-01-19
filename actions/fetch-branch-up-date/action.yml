@@ -1,0 +1,41 @@
+name: 'Fetch through merge-base'
+description: 'Fetch PR commits through the merge-base'
+inputs:
+  BASE_REF:
+    default: ${{ github.base_ref }}
+  HEAD_REF:
+    default: ${{ github.head_ref }}
+  DEEPEN_LENGTH:
+    default: 10
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.head_ref }}
+
+    - name: Fetching to set context
+      shell: bash
+      env:
+        BASE_REF: ${{ inputs.BASE_REF }}
+        HEAD_REF: ${{ inputs.HEAD_REF }}
+        DEEPEN_LENGTH: ${{ inputs.DEEPEN_LENGTH }}
+      run: |
+        DEEPEN_LENGTH=${DEEPEN_LENGTH:-10}
+        git fetch --progress --depth=1 origin "+refs/heads/$BASE_REF:refs/heads/$BASE_REF"
+        while [ -z "$( git merge-base "$BASE_REF" "$HEAD_REF" )" ]; do
+          git fetch -q --deepen="$DEEPEN_LENGTH" origin "$BASE_REF" "$HEAD_REF";
+        done
+      
+    - name: Check if branch is up to date
+      shell: bash
+      run: |
+        COMMIT_PULL_REQUEST=${{github.event.pull_request.head.sha}}
+        COMMIT_MAIN=$(git rev-parse "${{github.base_ref}}")
+        if git merge-base --is-ancestor ${COMMIT_MAIN} ${COMMIT_PULL_REQUEST}
+        then
+          echo "Branch ${BRANCH_NAME} is up to date"
+        else
+          echo "Error: Branch ${BRANCH_NAME} is not up to date with main"
+          exit 1
+        fi

@@ -1,0 +1,16 @@
+name: Remove Labels
+inputs:
+  LABELS:
+    description: The labels' name to be removed. Must be separated with line breaks if there're multiple labels.
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/github-script@v6
+      env:
+        LABELS: '${{inputs.LABELS}}'
+      with:
+        result-encoding: string
+        script: |
+          const script = require('./.github/actions/remove-label/index.js')
+          await script({github, context, core})
