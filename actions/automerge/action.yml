@@ -15,24 +15,7 @@ runs:
         METHOD: ${{ inputs.METHOD }}
       with:
         result-encoding: string
-        script: |
-          
-            const MAX_APPROVALS = process.env.MAX_APPROVALS;
-            try{
-                const { data : reviews } = await github.rest.pulls.listReviews({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    pull_number: context.issue.number,
-                });
-                const approvingReviewers = reviews.filter(review => review.state === "APPROVED")
-                if(!(approvingReviewers >=  MAX_APPROVALS)){
-                    core.setFailed(`Error: Approvals required ${MAX_APPROVALS}`);
-                }
-                console.log('Passed approvals');
-            }catch(err){
-                core.setFailed(`Error in checkReviews: ${err}`);  
-            }
-          
+        script: |          
             const METHOD = process.env.METHOD;
             try{
                 await github.rest.pulls.merge({
