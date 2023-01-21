@@ -1,9 +1,6 @@
 name: 'Automerge'
 description: 'Common automerge'
 inputs:
-  MAX_APPROVALS:
-    description: 'Max approvals PR'
-    required: true
   METHOD:
     default: "squash"
 runs:
@@ -11,7 +8,6 @@ runs:
   steps:
     - uses: actions/github-script@v6
       env: 
-        MAX_APPROVALS: ${{ inputs.MAX_APPROVALS }}
         METHOD: ${{ inputs.METHOD }}
       with:
         result-encoding: string
