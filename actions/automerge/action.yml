@@ -24,11 +24,6 @@ runs:
                 });
                 console.log(`Merge done`);
 
-            }catch(err){
-                core.setFailed(`Error in merge: ${err}`);
-            }
-          
-            try{
                 await github.rest.pulls.update({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
@@ -36,11 +31,7 @@ runs:
                     state: "closed"
                 });
                 console.log(`Pull request updated`);
-            }catch(err){
-                core.setFailed(`Error in updatePullRequestState: ${err}`);
-            }   
-            
-            try{
+              
                 await github.rest.git.deleteRef({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
@@ -48,6 +39,6 @@ runs:
                 });
                 console.log(`Branch deleted`);
             }catch(err){
-                core.setFailed(`Error in deleteBranch: ${err}`);
+                core.setFailed(`Error automerge: ${err}`);  
             }
             
