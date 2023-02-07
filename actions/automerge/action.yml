@@ -21,7 +21,7 @@ runs:
         script: |          
             const METHOD = process.env.METHOD;
 
-            const updateLock = async (value) => {
+            const updateBranch = async (value) => {
               await github.rest.repos.updateBranchProtection({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -46,7 +46,7 @@ runs:
                     merge_method: METHOD
                 });
                 core.debug('Merge done');
-                await updateLock(true);
+                await updateBranch(true);
                 core.debug('Locked branch');
 
                 await github.rest.pulls.update({
@@ -63,7 +63,7 @@ runs:
                 });
                 core.debug('Branch deleted');   
             }catch(err){
-                await updateLock(true);
+                await updateBranch(true);
                 core.setFailed(`Error automerge: ${err}`);
             }
             
