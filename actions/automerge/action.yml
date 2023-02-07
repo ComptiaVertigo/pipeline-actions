@@ -3,6 +3,12 @@ description: 'Common automerge'
 inputs:
   METHOD:
     default: "squash"
+  BRANCH:
+    description: 'Branch to lock and unlock'
+    required: true
+  GITHUB_TOKEN:
+    description: 'Token used'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -13,7 +19,23 @@ runs:
         result-encoding: string
         script: |          
             const METHOD = process.env.METHOD;
+
+            const updateLock = async (value) => {
+              await github.rest.repos.updateBranchProtection({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: 'main',
+                required_status_checks: null,
+                restrictions: null,
+                enforce_admins: null,
+                required_pull_request_reviews: null,
+                lock_branch: value
+              })
+            }
+
             try{
+                await updateBranch(false);
+                core.debug('Unlocked branch');
                 await github.rest.pulls.merge({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
@@ -22,7 +44,9 @@ runs:
                     commit_message: "",
                     merge_method: METHOD
                 });
-                console.log(`Merge done`);
+                core.debug('Merge done');
+                await updateLock(true);
+                core.debug('Locked branch');
 
                 await github.rest.pulls.update({
                     owner: context.repo.owner,
@@ -30,15 +54,15 @@ runs:
                     pull_number: context.issue.number,
                     state: "closed"
                 });
-                console.log(`Pull request updated`);
-              
+                core.debug('Pull request updated');              
                 await github.rest.git.deleteRef({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
                     ref: `heads/${context.payload.pull_request.head.ref}`,
                 });
-                console.log(`Branch deleted`);
+                core.debug('Branch deleted');   
             }catch(err){
-                core.setFailed(`Error automerge: ${err}`);  
+                await updateLock(true);
+                core.setFailed(`Error automerge: ${err}`);
             }
             

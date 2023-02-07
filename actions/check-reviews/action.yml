@@ -21,7 +21,7 @@ runs:
                 if(!(approvingReviewers >=  MAX_APPROVALS)){
                     core.setFailed(`Error: Approvals required ${MAX_APPROVALS}`);
                 }
-                console.log('Passed approvals');
+                core.debug('Passed approvals');
             }catch(err){
                 core.setFailed(`Error in checkReviews: ${err}`);  
             }

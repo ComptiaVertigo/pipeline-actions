@@ -22,6 +22,6 @@ runs:
                       name: label
                   })
               }catch(err){
-                  console.log(`${label} not included`)
+                  core.debug(`${label} not included`);
               }
           }
