@@ -15,7 +15,9 @@ runs:
     - uses: actions/github-script@v6
       env: 
         METHOD: ${{ inputs.METHOD }}
+        GITHUB_ACTION: 
       with:
+        github-token: ${{ inputs.GITHUB_TOKEN }}
         result-encoding: string
         script: |          
             const METHOD = process.env.METHOD;
